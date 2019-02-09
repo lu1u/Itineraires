@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MonStyle">
+        <attr name="tintIcones" format="reference" />
+        <attr name="couleurHint" format="reference" />
+        <attr name="couleurBack" format="reference" />
+        <attr name="toolbarBackground" format="reference" />
+        <attr name="colorPrimaireLight" format="reference" />
+        <attr name="colorPrimaire" format="reference" />
+        <attr name="colorPrimaireFonce" format="reference" />
+        <attr name="android:background" />
+    </declare-styleable>
+
+<!--
+    <declare-styleable name="InteractiveLineGraphView">
+        <attr name="ILGV_labelTextSize" format="dimension" />
+        <attr name="ILGV_labelTextColor" format="color" />
+        <attr name="ILGV_labelSeparation" format="dimension" />
+        <attr name="ILGV_axisThickness" format="dimension" />
+        <attr name="ILGV_axisColor" format="color" />
+        <attr name="ILGV_dataThickness" format="dimension" />
+        <attr name="ILGV_dataColor" format="color" />
+        <attr name="ILGV_gridThickness" format="dimension" />
+        <attr name="ILGV_gridColor" format="color" />
+    </declare-styleable>
+-->
+</resources>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".EditRandoActivity"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@drawable/toolbar"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" android:orientation="vertical" android:layout_margin="@dimen/appbar_padding_top"
+
+    >
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MapsActivity" />
+
+    <TextView
+        android:id="@+id/textViewDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:visibility="invisible" />
+
+    <com.lpi.itineraires.linegraphview.ZoomableLinegraphView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/ilgvVitesseTemps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:ILGV_axisColor="@color/accent4"
+        app:ILGV_axisThickness="1dp"
+        app:ILGV_dataColor="@color/colorAccent"
+        app:ILGV_dataThickness="2dp"
+        app:ILGV_gridColor="@color/colorPrimaryLight"
+        app:ILGV_gridThickness="0.5dp"
+        app:ILGV_labelSeparation="1dp"
+        app:ILGV_labelTextColor="@color/colorPrimaryDark"
+        app:ILGV_labelTextSize="16dp"
+        tools:context=".details.CourbeActivity"
+        tools:layout_editor_absoluteX="59dp"
+        tools:layout_editor_absoluteY="64dp" />
+
+    <com.lpi.itineraires.linegraphview.ZoomableLinegraphView
+        android:id="@+id/ilgvAltitudeTemps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        app:ILGV_axisColor="@color/accent4"
+        app:ILGV_axisThickness="1dp"
+        app:ILGV_dataColor="@color/accent2"
+        app:ILGV_dataThickness="2dp"
+        app:ILGV_gridColor="@color/colorPrimaryLight"
+        app:ILGV_gridThickness="0.5dp"
+        app:ILGV_labelSeparation="1dp"
+        app:ILGV_labelTextColor="@color/colorPrimaryDark"
+        app:ILGV_labelTextSize="16dp"
+        tools:context=".details.CourbeActivity"
+        tools:layout_editor_absoluteX="59dp"
+        tools:layout_editor_absoluteY="64dp" />
+
+    <com.lpi.itineraires.linegraphview.ZoomableLinegraphView
+        android:id="@+id/ilgvDistanceTemps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        app:ILGV_axisColor="@color/accent4"
+        app:ILGV_axisThickness="1dp"
+        app:ILGV_dataColor="@color/accent3"
+        app:ILGV_dataThickness="2dp"
+        app:ILGV_gridColor="@color/colorPrimaryLight"
+        app:ILGV_gridThickness="0.5dp"
+        app:ILGV_labelSeparation="1dp"
+        app:ILGV_labelTextColor="@color/colorPrimaryDark"
+        app:ILGV_labelTextSize="16dp"
+        tools:context=".details.CourbeActivity"
+        tools:layout_editor_absoluteX="59dp"
+        tools:layout_editor_absoluteY="64dp" />
+
+    <com.lpi.itineraires.linegraphview.ZoomableLinegraphView
+        android:id="@+id/ilgvVitesseVTemps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        app:ILGV_axisColor="@color/accent4"
+        app:ILGV_axisThickness="1dp"
+        app:ILGV_dataColor="@color/accent3"
+        app:ILGV_dataThickness="2dp"
+        app:ILGV_gridColor="@color/colorPrimaryLight"
+        app:ILGV_gridThickness="0.5dp"
+        app:ILGV_labelSeparation="1dp"
+        app:ILGV_labelTextColor="@color/colorPrimaryDark"
+        app:ILGV_labelTextSize="16dp"
+        tools:context=".details.CourbeActivity"
+        tools:layout_editor_absoluteX="59dp"
+        tools:layout_editor_absoluteY="64dp" />
+</LinearLayout>
+</LinearLayout>

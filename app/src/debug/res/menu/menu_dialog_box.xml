@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/buttonOK"
+        android:icon="@drawable/ic_check"
+        android:title="@android:string/ok"
+        app:showAsAction="ifRoom"/>
+</menu>

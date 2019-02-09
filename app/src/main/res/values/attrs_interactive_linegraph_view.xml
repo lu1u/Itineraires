@@ -1,0 +1,13 @@
+<resources>
+    <declare-styleable name="ZoomableView">
+        <attr name="ILGV_labelTextSize" format="dimension" />
+        <attr name="ILGV_labelTextColor" format="color" />
+        <attr name="ILGV_labelSeparation" format="dimension" />
+        <attr name="ILGV_axisThickness" format="dimension" />
+        <attr name="ILGV_axisColor" format="color" />
+        <attr name="ILGV_dataThickness" format="dimension" />
+        <attr name="ILGV_dataColor" format="color" />
+        <attr name="ILGV_gridThickness" format="dimension" />
+        <attr name="ILGV_gridColor" format="color" />
+    </declare-styleable>
+</resources>

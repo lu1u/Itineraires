@@ -1,0 +1,15 @@
+<resources>
+    <declare-styleable name="LinegraphView">
+        <attr name="LGcouleurCourbeHaut" format="color" />
+        <attr name="LGcouleurCourbeBas" format="color" />
+        <attr name="LGcouleurAxes" format="color" />
+        <attr name="LGcouleurLabels" format="color" />
+        <attr name="LGlargeurLigne" format="dimension" />
+        <attr name="LGlargeurAxes" format="dimension" />
+        <attr name="LGdecalageTexteAxes" format="dimension" />
+        <attr name="LGtailleTexte" format="dimension" />
+        <attr name="LGzoomMin" format="float" />
+        <attr name="LGzoomMax" format="float" />
+        <attr name="LGtraceAxes" format="boolean" />
+    </declare-styleable>
+</resources>

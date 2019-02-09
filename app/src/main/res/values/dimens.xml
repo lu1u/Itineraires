@@ -1,0 +1,20 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="appbar_padding_top">8dp</dimen>
+    <dimen name="flowlayout_horizontal_padding">10dp</dimen>
+    <dimen name="flowlayout_vertical_padding">10dp</dimen>
+    <dimen name="hauteur_liste_item">110dp</dimen>
+    <dimen name="padding_bouton">8dp</dimen>
+    <dimen name="marge_bouton">12dp</dimen>
+    <dimen name="taille_bouton_liste_profil_petit">42dp</dimen>
+    <dimen name="taille_image_liste">48dp</dimen>
+    <dimen name="largeur_label_preferences">80dp</dimen>
+    <dimen name="elevation_groupe">8dp</dimen>
+    <dimen name="taille_icone_liste">48dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="chart_padding">16dp</dimen>
+    <dimen name="min_chart_size">100dp</dimen>
+    <dimen name="coin_fond_element_liste">3dp</dimen>
+</resources>

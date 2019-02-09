@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">Itinéraires</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="itineraire">Itinéraire</string>
+    <string name="nom_rando">Nom</string>
+    <string name="title_activity_edit_itineraire">Itinéraire</string>
+    <string name="modifier">Modifier</string>
+    <string name="supprimer">Supprimer</string>
+    <string name="pas_de_itineraire">Aucun itinéraire.\nVeuillez cliquer sur le bouton + pour ajouter un itineraire</string>
+    <string name="type_rando">Type</string>
+    <string name="menu_enregistrer">Enregistrer</string>
+    <string name="menu_arret">Arrêter</string>
+    <string name="title_activity_details">Details</string>
+    <string name="tab_text_1">Détails</string>
+    <string name="tab_text_2">Vitesse/Temps</string>
+    <string name="tab_text_3">Distance/Temps</string>
+    <string name="tab_text_4">Altitude/Temps</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="title_activity_database">Database</string>
+    <string name="title_activity_maps">Carte</string>
+    <string name="nbpositions">%1$d positions</string>
+    <string name="enregistrement_en_cours">Enregistrement en cours,\nDébut %1$s</string>
+    <string name="debut_fin">Début: %1$s,\nFin %2$s</string>
+    <string name="debut">Début: %1$s</string>
+
+    <string name="creation">Création: %1$s</string>
+    <string name="nbPositions">\n%1$d positions enregistrées</string>
+    <string name="title_activity_database2">Database</string>
+    <string name="menu_details">Détails</string>
+    <string name="menu_carte">Carte</string>
+    <string name="rando_sans_nom">Sans nom %1$d</string>
+    <string name="title_activity_preferences">Préférences</string>
+    <string name="debut_enregistrement">Début de l\'enregistrement pour %1$s</string>
+    <string name="arret_enregistrement">Arrêt de l\'enregistrement pour %1$s</string>
+    <string name="title_activity_details_itineraires">DetailsItinerairesActivity</string>
+    <string name="map_activity_advice">Utilisez le menu pour afficher d\'autres détails sur cet itinéraire</string>
+    <string name="supprimer_itineraire">Supprimer l\'itinéraire \'%1$s\'? \nPositions enregistrées : %2$d </string>
+</resources>

@@ -1,0 +1,99 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:popupMenuStyle">@style/popupMenuStyle</item>
+
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Theme1" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorPrimaire">@color/primary</item>
+        <item name="colorPrimaireFonce">@color/primary_dark</item>
+        <item name="colorPrimaireLight">@color/primary_light</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="tintIcones">@color/tintIcon</item>
+        <item name="couleurHint">@color/couleurHint</item>
+        <item name="couleurBack">@color/couleurBack</item>
+    </style>
+
+    <style name="Theme2" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primary2</item>
+        <item name="colorPrimaryDark">@color/primary_dark2</item>
+        <item name="colorPrimaire">@color/primary2</item>
+        <item name="colorPrimaireFonce">@color/primary_dark2</item>
+        <item name="colorPrimaireLight">@color/primary_light2</item>
+        <item name="colorAccent">@color/accent2</item>
+        <item name="tintIcones">@color/tintIcon2</item>
+        <item name="couleurHint">@color/couleurHint2</item>
+        <item name="couleurBack">@color/couleurBack2</item>
+    </style>
+
+    <style name="Theme3" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primary3</item>
+        <item name="colorPrimaryDark">@color/primary_dark3</item>
+        <item name="colorPrimaire">@color/primary3</item>
+        <item name="colorPrimaireFonce">@color/primary_dark3</item>
+        <item name="colorPrimaireLight">@color/primary_light3</item>
+        <item name="colorAccent">@color/accent3</item>
+        <item name="tintIcones">@color/tintIcon3</item>
+        <item name="couleurHint">@color/couleurHint3</item>
+        <item name="couleurBack">@color/couleurBack3</item>
+    </style>
+
+    <style name="Theme4" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primary4</item>
+        <item name="colorPrimaryDark">@color/primary_dark4</item>
+        <item name="colorPrimaire">@color/primary4</item>
+        <item name="colorPrimaireFonce">@color/primary_dark4</item>
+        <item name="colorPrimaireLight">@color/primary_light4</item>
+        <item name="colorAccent">@color/accent4</item>
+        <item name="tintIcones">@color/tintIcon4</item>
+        <item name="couleurHint">@color/couleurHint4</item>
+        <item name="couleurBack">@color/couleurBack4</item>
+    </style>
+
+    <style name="Theme5" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primary5</item>
+        <item name="colorPrimaryDark">@color/primary_dark5</item>
+        <item name="colorPrimaire">@color/primary5</item>
+        <item name="colorPrimaireFonce">@color/primary_dark5</item>
+        <item name="colorPrimaireLight">@color/primary_light5</item>
+        <item name="colorAccent">@color/accent5</item>
+        <item name="tintIcones">@color/tintIcon5</item>
+        <item name="couleurHint">@color/couleurHint5</item>
+        <item name="couleurBack">@color/couleurBack5</item>
+
+    </style>
+
+    <style name="Theme6" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primary6</item>
+        <item name="colorPrimaryDark">@color/primary_dark6</item>
+        <item name="colorPrimaire">@color/primary6</item>
+        <item name="colorPrimaireLight">@color/primary_light6</item>
+        <item name="colorPrimaireFonce">@color/primary_dark6</item>
+        <item name="colorAccent">@color/accent6</item>
+        <item name="tintIcones">@color/tintIcon6</item>
+        <item name="couleurHint">@color/couleurHint6</item>
+        <item name="couleurBack">@color/couleurBack6</item>
+
+    </style>
+
+    <style name="popupMenuStyle" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:itemBackground">@android:color/white</item>
+    </style>
+</resources>

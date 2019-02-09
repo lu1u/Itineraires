@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="themes">
+        <item>Bleu</item>
+        <item>Vert</item>
+        <item>Pourpre</item>
+        <item>Marron</item>
+        <item>Gris</item>
+        <item>Jaune</item>
+    </string-array>
+
+    <string-array name="distances">
+        <item>Minimum (0m)</item>
+        <item>Moyennes (5m)</item>
+        <item>Grandes (10m)</item>
+        <item>Immenses (50m)</item>
+    </string-array>
+
+    <integer-array name="distances_valeurs">
+        <item>0</item>
+        <item>5</item>
+        <item>10</item>
+        <item>50</item>
+    </integer-array>
+
+    <string-array name="vues_details">
+        <item>Description</item>
+        <item>Vitesse/Temps</item>
+        <item>Altitude/Temps</item>
+        <item>Distance/Temps</item>
+    </string-array>
+
+    <string-array name="delais">
+        <item>Courts (1s)</item>
+        <item>Moyens (2s)</item>
+        <item>Défaut(5s)</item>
+        <item>Grands (10s)</item>
+        <item>Immenses (30s)</item>
+    </string-array>
+
+    <integer-array name="delais_valeurs">
+        <item>1</item>
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+        <item>30</item>
+    </integer-array>
+
+    <string-array name="niveauxRapport">
+        <item>DEBUG</item>
+        <item>WARNING</item>
+        <item>ERROR</item>
+    </string-array>
+
+
+    <string-array name="types_itineraires">
+        <item>A pied</item>
+        <item>VTT</item>
+        <item>Vélo</item>
+        <item>Ski de piste</item>
+        <item>Ski de fond</item>
+        <item>Ski de randonnée</item>
+        <item>Moto</item>
+        <item>Voiture</item>
+        <item>Autre</item>
+    </string-array>
+</resources>

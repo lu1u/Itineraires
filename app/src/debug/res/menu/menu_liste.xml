@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="lpi.sauvegardesamba.MainActivity">
+
+    <item
+        android:id="@+id/action_details"
+        android:icon="@mipmap/ic_launcher"
+        android:title="@string/menu_details" />
+    <item
+        android:id="@+id/action_exporter"
+        android:title="Exporter..." />
+    <group >
+        <item
+            android:id="@+id/action_modifier"
+            android:checkable="false"
+            android:title="@string/modifier" />
+        <item
+            android:id="@+id/action_supprimer"
+            android:title="@string/supprimer" />
+    </group>
+
+</menu>

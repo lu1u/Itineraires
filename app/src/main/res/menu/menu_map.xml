@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_affiche_carte"
+        android:title="Carte">
+        <menu>
+            <item
+                android:id="@+id/action_affiche_carte_routes"
+                android:title="Routes" />
+            <item
+                android:id="@+id/action_affiche_carte_satellite"
+                android:title="Satellite" />
+            <item
+                android:id="@+id/action_affiche_carte_hybride"
+                android:title="Hybride" />
+            <item
+                android:id="@+id/action_affiche_carte_terrain"
+                android:title="Terrain" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_affiche_details"
+        android:title="Détails" />
+    <item
+        android:id="@+id/action_affiche_vitesse_temps"
+        android:title="Vitesse/Temps" />
+    <item
+        android:id="@+id/action_affiche_distance_temps"
+        android:title="Distance/Temps" />
+    <item
+        android:id="@+id/action_affiche_altitude_temps"
+        android:title="Altitude/Temps" />
+    <item
+        android:id="@+id/action_affiche_vitessevert_temps"
+        android:title="Vitesse vert/Temps" ></item>
+</menu>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+    tools:context=".details.CourbeRandoFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <com.lpi.itineraires.linegraphview.ZoomableView
+        android:id="@+id/interactiveLineGraphView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:ILGV_axisColor="@android:color/black"
+        app:ILGV_axisThickness="1.5dp"
+        app:ILGV_dataColor="@color/colorAccent"
+        app:ILGV_dataThickness="4dp"
+        app:ILGV_gridColor="@android:color/darker_gray"
+        app:ILGV_gridThickness="0.5dp"
+        app:ILGV_labelSeparation="0.5dp"
+        app:ILGV_labelTextColor="@color/secondary_text6"
+        app:ILGV_labelTextSize="10dp" />
+
+    <com.lpi.itineraires.linegraphview.LinegraphView
+        android:id="@+id/linegraphView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        app:LGcouleurAxes="#999"
+        app:LGcouleurCourbeBas="@color/colorAccent"
+        app:LGcouleurCourbeHaut="@android:color/holo_red_dark"
+        app:LGcouleurLabels="@color/icons6"
+        app:LGdecalageTexteAxes="1dp"
+        app:LGlargeurAxes="2dp"
+        app:LGlargeurLigne="4dp"
+        app:LGtailleTexte="32dp"
+        app:LGtraceAxes="true" />
+</FrameLayout>
