@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.lpi.itineraires.database.ItinerairesDatabase;
 import com.lpi.itineraires.itineraire.Itineraire;
+import com.lpi.itineraires.itineraire.TypeItineraire;
 import com.lpi.itineraires.utils.Utils;
 
 public class EditRandoActivity extends AppCompatActivity
@@ -126,7 +127,7 @@ public class EditRandoActivity extends AppCompatActivity
 		if (_itineraire != null)
 		{
 			_eNom.setText(_itineraire.Nom);
-			_spType.setSelection(Itineraire.typeToInt(_itineraire.Type));
+			_spType.setSelection(TypeItineraire.typeToInt(_itineraire.Type));
 		}
 	}
 
@@ -193,7 +194,7 @@ public class EditRandoActivity extends AppCompatActivity
 			_itineraire = new Itineraire();
 
 		_itineraire.Nom = _eNom.getText().toString();
-		_itineraire.Type = Itineraire.intToType(_spType.getSelectedItemPosition());
+		_itineraire.Type = TypeItineraire.intToType(_spType.getSelectedItemPosition());
 
 		boolean erreur = false;
 

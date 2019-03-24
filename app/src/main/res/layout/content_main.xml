@@ -14,9 +14,12 @@
         android:id="@+id/listView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_margin="4dp"
         android:choiceMode="singleChoice"
         android:divider="?attr/colorPrimaireLight"
-        android:padding="2dp"
+        android:dividerHeight="8dp"
+        android:drawSelectorOnTop="true"
+        android:padding="4dp"
         android:scrollingCache="true"
         android:smoothScrollbar="true" />
 

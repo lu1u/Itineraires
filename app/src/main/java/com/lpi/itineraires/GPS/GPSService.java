@@ -5,11 +5,11 @@
 package com.lpi.itineraires.GPS;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Location;
@@ -18,6 +18,8 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -28,20 +30,26 @@ import com.lpi.itineraires.database.ItinerairesDatabase;
 import com.lpi.itineraires.itineraire.Position;
 import com.lpi.itineraires.utils.Preferences;
 import com.lpi.itineraires.utils.Report;
-import com.lpi.itineraires.utils.Utils;
 
 
 public class GPSService extends Service implements LocationListener
 {
 	private static final String DEMARRAGE = GPSService.class.getCanonicalName() + ".action.DEMARRAGE";
 	private static final String STOP = GPSService.class.getCanonicalName() + ".action.STOP";
-	private static final int DELTA_TIME = 1000 * 60;//* 2;
+	private static final String REFRESH = GPSService.class.getCanonicalName() + ".action.REFRESH";
+	//private static final int DELTA_TIME = 1000 * 60;//* 2;
+	private static final int TWO_MINUTES = 1000 * 60 * 2;
 
+	private static PowerManager.WakeLock wl;
 
 	private Report _report;
 	@Nullable
 	private LocationManager _locationManager;
 	private Location dernierePosition;
+	private PendingIntent _pendingIntentAlarme;
+	private AlarmManager _alarmManager;
+	private int _minDistance;
+	private Intent _alarmReceiverIntent;
 
 	public GPSService()
 	{
@@ -56,14 +64,28 @@ public class GPSService extends Service implements LocationListener
 	{
 		// Obtenir le nombre de randonnees en cours d'enregistrement
 		ItinerairesDatabase database = ItinerairesDatabase.getInstance(context);
-		final int nbRandonnees = database.getItinerairesEnregistrant();
+		final int nbRandonnees = database.getNbItinerairesEnregistrant();
 
 		// Si 0 randonnees: arreter le GPS
 		if (nbRandonnees == 0)
+		{
+			if (wl != null)
+				if (wl.isHeld())
+					wl.release();
 			GPSService.arrete(context);
+		}
 		else
-			if (!Utils.serviceEstDemarre(context, GPSService.class))
-				GPSService.demarre(context);
+		{
+			if (wl == null)
+			{
+				PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+				wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Itineraires:");
+			}
+
+			wl.acquire();
+			//if (!Utils.serviceEstDemarre(context, GPSService.class))
+			GPSService.demarre(context);
+		}
 	}
 
 	/***
@@ -88,6 +110,13 @@ public class GPSService extends Service implements LocationListener
 		context.startService(intent);
 	}
 
+	public static void refresh(@NonNull Context context)
+	{
+		Intent intent = new Intent(context, GPSService.class);
+		intent.setAction(REFRESH);
+		context.startService(intent);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see android.app.Service#onBind(android.content.Intent)
@@ -101,7 +130,7 @@ public class GPSService extends Service implements LocationListener
 
 
 	/***
-	 * receptiond de la commande de demarrage ou d'arret
+	 * reception de la commande de demarrage ou d'arret
 	 * @param intent
 	 * @param flags
 	 * @param startId
@@ -111,24 +140,12 @@ public class GPSService extends Service implements LocationListener
 	public int onStartCommand(Intent intent, int flags, int startId)
 	{
 		super.onStartCommand(intent, flags, startId);
+		_report = Report.getInstance(getApplicationContext());
 
 		String action = intent.getAction();
 		if (DEMARRAGE.equals(action))
 		{
 			// Demarre le service
-			IntentFilter intentFilter = new IntentFilter();
-			intentFilter.addAction(DEMARRAGE);
-			intentFilter.addAction(STOP);
-			// Enregistre un broadcastreceiver pour recevoir les commandes
-			registerReceiver(new BroadcastReceiver()
-			{
-				@Override
-				public void onReceive(Context context, Intent intent)
-				{
-					onServiceReceive(context, intent);
-				}
-			}, intentFilter);
-
 			handleActionDemarre();
 			return START_STICKY;
 		}
@@ -138,6 +155,13 @@ public class GPSService extends Service implements LocationListener
 				// Arrete ce service
 				handleActionStop();
 			}
+			else
+				if (REFRESH.equals(action))
+				{
+					// Demarre le service
+					handleActionRefresh();
+					return START_STICKY;
+				}
 
 		return START_NOT_STICKY;
 	}
@@ -174,10 +198,10 @@ public class GPSService extends Service implements LocationListener
 		try
 		{
 			Context context = getApplicationContext();
-			_report = Report.getInstance(context);
 			Preferences prefs = Preferences.getInstance(context);
+			final int GPSDelai = prefs.getGPSMinTime();
+			_minDistance = prefs.getGPSMinDistance();
 
-			_report.historique("Démarrage GPS");
 			if (_locationManager == null)
 			{
 				// GPS
@@ -185,44 +209,74 @@ public class GPSService extends Service implements LocationListener
 				if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
 						|| ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 				{
-					String[] p = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-					ActivityCompat.requestPermissions(null, p, 0);
 					return;
 				}
 
-				_report.log(Report.NIVEAU.DEBUG, "Création du GPS");
+				_report.log(Report.NIVEAU.DEBUG, "Création du GPS manager");
 				_locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-				final int GPSDelai = prefs.getGPSMinTime();
-				final int GPSDistance = prefs.getGPSMinDistance();
-
-				if (prefs.getLocalisationGPS())
-				{
-					_report.log(Report.NIVEAU.DEBUG, "Demarrage localisation GPS");
-					_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPSDelai, GPSDistance, this);
-				}
-				if (prefs.getLocalisationReseau())
-				{
-					_report.log(Report.NIVEAU.DEBUG, "Demarrage localisation Reseau");
-					_locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, GPSDelai, GPSDistance, this);
-				}
-
 			}
-			else
-				_locationManager = null;
+
+
+			if (prefs.getLocalisationGPS())
+			{
+				_report.log(Report.NIVEAU.DEBUG, "Demarrage localisation GPS");
+				_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPSDelai, _minDistance, this);
+			}
+			if (prefs.getLocalisationReseau())
+			{
+				_report.log(Report.NIVEAU.DEBUG, "Demarrage localisation Reseau");
+				_locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, GPSDelai, _minDistance, this);
+			}
+
+			_alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+			timeOutGPS(context);
 		} catch (Exception e)
 		{
 			_report.log(Report.NIVEAU.ERROR, e);
 		}
 	}
 
+	/***
+	 * Creer une alarme pour lire les coordonnees GPS si on n'en a pas recu depuis un certain
+	 * temps
+	 * @param context
+	 */
+	private void timeOutGPS(@NonNull final Context context)
+	{
+		final int delai = Preferences.getInstance(context).getGPSMinTime() * 4; // 4 fois le delai pour laisser une chance au GPS de nous prevenir de lui meme
+
+		if (_alarmReceiverIntent == null)
+			_alarmReceiverIntent = new Intent(context, AlarmReceiver.class);
+
+		// Supprimer l'ancienne alarme
+		_pendingIntentAlarme = PendingIntent.getBroadcast(context, 0, _alarmReceiverIntent, 0);
+		_alarmManager.cancel(_pendingIntentAlarme);
+
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _alarmReceiverIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+		// Nouvelle position dans n secondes au plus tard
+		_alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delai, pendingIntent);
+	}
+
+	/***
+	 * Arrete le timeout GPS
+	 */
+	private void arreteTimeOutGPS()
+	{
+		if (_alarmManager != null && _pendingIntentAlarme != null)
+			_alarmManager.cancel(_pendingIntentAlarme);
+	}
+
 	/**
-	 * Handle action Baz in the provided background thread with the provided
-	 * parameters.
+	 * Arreter de surveiller le GPS
 	 */
 	private void handleActionStop()
 	{
 		try
 		{
+			arreteTimeOutGPS();
+
 			if (_locationManager != null)
 			{
 				_report.log(Report.NIVEAU.DEBUG, "Arret du GPS");
@@ -235,6 +289,38 @@ public class GPSService extends Service implements LocationListener
 		} catch (Exception e)
 		{
 			_report.log(Report.NIVEAU.ERROR, e);
+		}
+	}
+
+	/**
+	 * Forcer la lecture de la derniere position connue
+	 * Mecanisme pour demander la derniere position du GPS si on n'en a pas recu depuis un
+	 * certain temps
+	 */
+	private void handleActionRefresh()
+	{
+		Context context = getApplicationContext();
+		if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+				|| ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+			return;
+
+		if (_locationManager != null)
+		{
+			Preferences prefs = Preferences.getInstance(context);
+
+			if (prefs.getLocalisationGPS())
+			{
+				ajoutePosition(_locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+				return;
+			}
+			if (prefs.getLocalisationReseau())
+			{
+				ajoutePosition(_locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+				return;
+			}
+
+			// Redemander un timeout GPS
+			timeOutGPS(context);
 		}
 	}
 
@@ -253,21 +339,39 @@ public class GPSService extends Service implements LocationListener
 			return;
 		}
 
+		ajoutePosition(ici);
+	}
+
+	/***
+	 * Ajoute une position pour tous les itineraires en cours d'enregistrement
+	 * @param ici
+	 */
+	private void ajoutePosition(Location ici)
+	{
+		if (dernierePosition != null)
+			if (ici.distanceTo(dernierePosition) < _minDistance)
+			{
+				// Distance trop petite depuis la derniere fois
+				_report.log(Report.NIVEAU.DEBUG, "Distance trop courte, position rejetee");
+				return;
+			}
+
 		// Ajouter cette position a toutes les randonnees qui enregistrent
 		Position pos = new Position(ici);
-		pos.Vitesse = getVitesse(ici);          // Truc pour le cas ou la vitesse n'est pas supportee par le GPS
+		//pos.setSpeed(getVitesse(ici));          // Truc pour le cas ou la vitesse n'est pas supportee par le GPS
+		getVitesse(pos, dernierePosition);
 
-		_report.log(Report.NIVEAU.DEBUG, String.format("Lat:%.03f, Lg:%.03f, V:%.02f, T:%s", (float) pos.Latitude, (float) pos.Longitude, pos.Vitesse, Long.toString(pos.Temps)));
+		_report.log(Report.NIVEAU.DEBUG, String.format("Lat:%.03f, Lg:%.03f, V:%.02f, T:%s", (float) pos.getLatitude(), (float) pos.getLongitude(), pos.getSpeed(), Long.toString(pos.getTime())));
 
-		ItinerairesDatabase database = ItinerairesDatabase.getInstance(getApplicationContext());
+		Context context = getApplicationContext();
+		ItinerairesDatabase database = ItinerairesDatabase.getInstance(context);
 		try
 		{
-			//database.beginTransaction();
+			// Ajouter cette position pour toutes les randonnees enregistrant
 			Cursor c = database.getItinerairesIdEnregistrant();
 			if (c != null)
 			{
 				final int colonne = c.getColumnIndex(DatabaseHelper.COLONNE_ITI_ID);
-				// Ajouter cette position pour toutes les randonnees enregistrant
 				while (c.moveToNext())
 				{
 					pos.IdRandonnee = c.getInt(colonne);
@@ -276,15 +380,14 @@ public class GPSService extends Service implements LocationListener
 				}
 				c.close();
 			}
-			//database.setTransactionSuccessful();
 		} catch (Exception e)
 		{
 			_report.log(Report.NIVEAU.ERROR, "Erreur lors de l'ajout d'une nouvelle position");
 			_report.log(Report.NIVEAU.ERROR, e);
 		}
 
-		//database.endTransaction();
 		dernierePosition = ici;
+		timeOutGPS(context);
 	}
 
 	/***
@@ -292,25 +395,28 @@ public class GPSService extends Service implements LocationListener
 	 * @param loc
 	 * @return
 	 */
-	private float getVitesse(@NonNull Location loc)
+	private void getVitesse(@NonNull Location loc, @Nullable Location derniere)
 	{
 		if (loc.hasSpeed())
 		{
-			_report.log(Report.NIVEAU.DEBUG, "Location has speed: " + loc.getSpeed() + "m/s");
-			return loc.getSpeed();
+			//_report.log(Report.NIVEAU.DEBUG, "Location has speed: " + loc.getSpeed() + "m/s");
+			//return loc.getSpeed();
+			return;
 		}
 
-		if (dernierePosition == null)
+		if (derniere == null)
 		{
-			_report.log(Report.NIVEAU.DEBUG, "Premiere position: vitesse 0");
-			return 0;
+			//_report.log(Report.NIVEAU.DEBUG, "Premiere position: vitesse 0");
+			//return 0;
+			return;
 		}
 
 		double distance = loc.distanceTo(dernierePosition);
 		double temps = loc.getTime() - dernierePosition.getTime();
 		_report.log(Report.NIVEAU.DEBUG, "Location ne supporte pas vitesse: " + distance + "m / " + temps + "s =" + (float) (distance / temps) + "m/s");
 
-		return (float) (distance / temps);
+		loc.setSpeed((float) (distance / temps));
+		//return (float) (distance / temps);
 	}
 
 	@Override
@@ -338,33 +444,30 @@ public class GPSService extends Service implements LocationListener
 	 * @param location            The new Location that you want to evaluate
 	 * @param currentBestLocation The current Location fix, to which you want to compare the new one
 	 */
-	protected boolean isBetterLocation(@NonNull Location location, @Nullable Location currentBestLocation)
+	protected boolean isBetterLocation(Location location, Location currentBestLocation)
 	{
-		if (currentBestLocation == null)
-		{
+		if (currentBestLocation == null) {
 			// A new location is always better than no location
 			return true;
 		}
 
 		// Check whether the new location fix is newer or older
 		long timeDelta = location.getTime() - currentBestLocation.getTime();
-		boolean isSignificantlyNewer = timeDelta > DELTA_TIME;
-		boolean isSignificantlyOlder = timeDelta < -DELTA_TIME;
+		boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
+		boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
 		boolean isNewer = timeDelta > 0;
 
 		// If it's been more than two minutes since the current location, use the new location
 		// because the user has likely moved
-		if (isSignificantlyNewer)
-		{
+		if (isSignificantlyNewer) {
 			return true;
 			// If the new location is more than two minutes older, it must be worse
 		}
 		else
 			if (isSignificantlyOlder)
 			{
-				_report.log(Report.NIVEAU.DEBUG, "Position bien plus vieille");
 				return false;
-			}
+		}
 
 		// Check whether the new location fix is more or less accurate
 		int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
@@ -377,8 +480,7 @@ public class GPSService extends Service implements LocationListener
 				currentBestLocation.getProvider());
 
 		// Determine location quality using a combination of timeliness and accuracy
-		if (isMoreAccurate)
-		{
+		if (isMoreAccurate) {
 			return true;
 		}
 		else
@@ -387,23 +489,13 @@ public class GPSService extends Service implements LocationListener
 				return true;
 			}
 			else
-			{
-				if (!isNewer)
+				if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider)
 				{
-					_report.log(Report.NIVEAU.DEBUG, "Position plus vieille");
-					return false;
+					return true;
 				}
-
-				if (isSignificantlyLessAccurate)
-				{
-					_report.log(Report.NIVEAU.DEBUG, "Position bien moins precise");
-					return false;
-				}
-
-
-				return isNewer && !isSignificantlyLessAccurate && isFromSameProvider;
-			}
+		return false;
 	}
+
 
 	/**
 	 * Checks whether two providers are the same
@@ -448,7 +540,6 @@ public class GPSService extends Service implements LocationListener
 
 		Toast t = Toast.makeText(context, "Erreur\n" + message + "\n", Toast.LENGTH_LONG); //$NON-NLS-1$
 		t.show();
-
 	}
 
 	/***
@@ -460,8 +551,9 @@ public class GPSService extends Service implements LocationListener
 	{
 		super.onDestroy();
 		_report.log(Report.NIVEAU.DEBUG, "Service.OnDestroy");
-		Context context = getApplicationContext();
-		if (ItinerairesDatabase.getInstance(context).getItinerairesEnregistrant() > 0)
-			GPSRelaunchReceiver.restartService(getApplicationContext());
+		if (ItinerairesDatabase.getInstance(this).getNbItinerairesEnregistrant() > 0)
+			GPSRelaunchReceiver.restartService(this);
 	}
+
+
 }

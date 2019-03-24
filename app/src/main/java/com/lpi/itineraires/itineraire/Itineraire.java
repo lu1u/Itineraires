@@ -14,6 +14,8 @@ import android.support.annotation.Nullable;
 import com.lpi.itineraires.R;
 import com.lpi.itineraires.database.DatabaseHelper;
 import com.lpi.itineraires.database.ItinerairesDatabase;
+import com.lpi.itineraires.utils.DoubleHolder;
+import com.lpi.itineraires.utils.FloatHolder;
 
 import java.util.Calendar;
 
@@ -22,10 +24,6 @@ import java.util.Calendar;
  */
 public class Itineraire
 {
-	enum TYPE
-	{
-		APIED, VTT, VELO, SKI_PISTE, SKI_FOND, SKI_RANDONNEE, MOTO, VOITURE, AUTRE
-	}
 
 	private static final long MINUTE = 60;
 	private static final long HEURE = MINUTE * 60;
@@ -34,7 +32,7 @@ public class Itineraire
 	public static final int INVALID_ID = -1;
 	public int Id = INVALID_ID;
 	public String Nom = "";
-	public TYPE Type = TYPE.AUTRE;
+	public TypeItineraire.TYPE Type = TypeItineraire.TYPE.AUTRE;
 	public long DateCreation = 0;
 	public long DateDebut = 0;
 	public long DateFin = 0;
@@ -44,14 +42,14 @@ public class Itineraire
 	{
 		Id = -1;
 		Nom = "sans nom";
-		Type = TYPE.AUTRE;
+		Type = TypeItineraire.TYPE.AUTRE;
 		DateCreation = Calendar.getInstance().getTimeInMillis();
 		DateDebut = 0;
 		DateFin = 0;
 		Enregistre = false;
 	}
 
-	public Itineraire(int id, String nom, TYPE type, int dateCreation, int dateDebut, int dateFin, boolean enregistre)
+	public Itineraire(int id, String nom, TypeItineraire.TYPE type, int dateCreation, int dateDebut, int dateFin, boolean enregistre)
 	{
 		Id = id;
 		Nom = nom;
@@ -72,7 +70,7 @@ public class Itineraire
 		{
 			Id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLONNE_ITI_ID));
 			Nom = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLONNE_ITI_NOM));
-			Type = intToType(cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLONNE_ITI_TYPE)));
+			Type = TypeItineraire.intToType(cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLONNE_ITI_TYPE)));
 			DateCreation = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLONNE_ITI_CREATION));
 			DateDebut = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLONNE_ITI_DEBUT));
 			DateFin = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLONNE_ITI_FIN));
@@ -89,7 +87,7 @@ public class Itineraire
 	{
 		Id = bundle.getInt(DatabaseHelper.COLONNE_ITI_ID, Id);
 		Nom = bundle.getString(DatabaseHelper.COLONNE_ITI_NOM, Nom);
-		Type = intToType(bundle.getInt(DatabaseHelper.COLONNE_ITI_TYPE, typeToInt(Type)));
+		Type = TypeItineraire.intToType(bundle.getInt(DatabaseHelper.COLONNE_ITI_TYPE, TypeItineraire.typeToInt(Type)));
 		DateCreation = bundle.getLong(DatabaseHelper.COLONNE_ITI_CREATION, DateCreation);
 		DateDebut = bundle.getLong(DatabaseHelper.COLONNE_ITI_DEBUT, DateDebut);
 		DateFin = bundle.getLong(DatabaseHelper.COLONNE_ITI_FIN, DateFin);
@@ -113,7 +111,7 @@ public class Itineraire
 		if (putId)
 			content.put(DatabaseHelper.COLONNE_ITI_ID, Id);
 		content.put(DatabaseHelper.COLONNE_ITI_NOM, Nom);
-		content.put(DatabaseHelper.COLONNE_ITI_TYPE, typeToInt(Type));
+		content.put(DatabaseHelper.COLONNE_ITI_TYPE, TypeItineraire.typeToInt(Type));
 		content.put(DatabaseHelper.COLONNE_ITI_CREATION, DateCreation);
 		content.put(DatabaseHelper.COLONNE_ITI_DEBUT, DateDebut);
 		content.put(DatabaseHelper.COLONNE_ITI_FIN, DateFin);
@@ -124,7 +122,7 @@ public class Itineraire
 	{
 		bundle.putInt(DatabaseHelper.COLONNE_ITI_ID, Id);
 		bundle.putString(DatabaseHelper.COLONNE_ITI_NOM, Nom);
-		bundle.putInt(DatabaseHelper.COLONNE_ITI_TYPE, typeToInt(Type));
+		bundle.putInt(DatabaseHelper.COLONNE_ITI_TYPE, TypeItineraire.typeToInt(Type));
 		bundle.putLong(DatabaseHelper.COLONNE_ITI_CREATION, DateCreation);
 		bundle.putLong(DatabaseHelper.COLONNE_ITI_DEBUT, DateDebut);
 		bundle.putLong(DatabaseHelper.COLONNE_ITI_FIN, DateFin);
@@ -141,7 +139,7 @@ public class Itineraire
 		String texte;
 
 		if (avecType)
-			texte = getTexteType(Type) + "\n";
+			texte = TypeItineraire.getTexteType(Type) + "\n";
 		else
 			texte = "";
 
@@ -172,86 +170,9 @@ public class Itineraire
 		return texte;
 	}
 
-	public static @NonNull
-	String getTexteType(TYPE type)
+	public String getDetails(Context context, @Nullable FloatHolder vitMin, @Nullable FloatHolder vitMax, @Nullable DoubleHolder altMin, @Nullable DoubleHolder altMax)
 	{
-		switch (type)
-		{
-			case APIED:
-				return "à pied";
-			case VTT:
-				return "vtt";
-			case VELO:
-				return "vélo";
-			case SKI_PISTE:
-				return "ski de piste";
-			case SKI_RANDONNEE:
-				return "ski de randonnée";
-			case SKI_FOND:
-				return "ski de fond";
-			case MOTO:
-				return "moto";
-			case VOITURE:
-				return "auto";
-			default:
-				return "autre";
-		}
-	}
-
-	@NonNull
-	static public TYPE intToType(int t)
-	{
-		switch (t)
-		{
-			case 0:
-				return TYPE.APIED;
-			case 1:
-				return TYPE.VTT;
-			case 2:
-				return TYPE.VELO;
-			case 3:
-				return TYPE.SKI_PISTE;
-			case 4:
-				return TYPE.SKI_RANDONNEE;
-			case 5:
-				return TYPE.SKI_FOND;
-			case 6:
-				return TYPE.MOTO;
-			case 7:
-				return TYPE.VOITURE;
-			default:
-				return TYPE.AUTRE;
-		}
-	}
-
-	static public int typeToInt(TYPE t)
-	{
-		switch (t)
-		{
-			case APIED:
-				return 0;
-			case VTT:
-				return 1;
-			case VELO:
-				return 2;
-			case SKI_PISTE:
-				return 3;
-			case SKI_RANDONNEE:
-				return 4;
-			case SKI_FOND:
-				return 5;
-			case MOTO:
-				return 6;
-			case VOITURE:
-				return 7;
-			default:
-				return 8;
-		}
-	}
-
-	public String getDetails(Context context)
-	{
-		String texte = "pas de randonnée";
+		String texte;
 
 		texte = "Nom: " + Nom + " (Id=" + Id + ")\n\n";
 		texte += getDescription(context, true);
@@ -267,39 +188,39 @@ public class Itineraire
 				cursor.moveToFirst();
 				Position precedente = new Position(cursor);
 				float Distance = 0;
-				float vitesseMin = precedente.Vitesse;
-				float vitesseMax = precedente.Vitesse;
-				double altitudeMin = precedente.Altitude;
-				double altitudeMax = precedente.Altitude;
+				float vitesseMin = precedente.getSpeed();
+				float vitesseMax = precedente.getSpeed();
+				double altitudeMin = precedente.getAltitude();
+				double altitudeMax = precedente.getAltitude();
 				double denivellePos = 0;
 				double denivelleNeg = 0;
 
-				long debut = precedente.Temps;
+				long debut = precedente.getTime();
 
 				while (cursor.moveToNext())
 				{
 					Position position = new Position(cursor);
 					Distance += precedente.distanceTo(position);
-					if (position.Vitesse < vitesseMin)
-						vitesseMin = position.Vitesse;
+					if (position.getSpeed() < vitesseMin)
+						vitesseMin = position.getSpeed();
 
-					if (position.Vitesse > vitesseMax)
-						vitesseMax = position.Vitesse;
+					if (position.getSpeed() > vitesseMax)
+						vitesseMax = position.getSpeed();
 
-					if ( position.Altitude < altitudeMin)
-						altitudeMin = position.Altitude;
+					if (position.getAltitude() < altitudeMin)
+						altitudeMin = position.getAltitude();
 
-					if ( position.Altitude> altitudeMax)
-						altitudeMax = position.Altitude;
+					if (position.getAltitude() > altitudeMax)
+						altitudeMax = position.getAltitude();
 
-					if ( position.Altitude > precedente.Altitude)
-						denivellePos += (position.Altitude-precedente.Altitude);
+					if (position.getAltitude() > precedente.getAltitude())
+						denivellePos += (position.getAltitude() - precedente.getAltitude());
 					else
-						denivelleNeg += (position.Altitude-precedente.Altitude);
+						denivelleNeg += (position.getAltitude() - precedente.getAltitude());
 
 					precedente = position;
 				}
-				long fin = precedente.Temps; // derniere
+				long fin = precedente.getTime(); // derniere
 				long duree = (fin - debut) / 1000L;
 				texte += "\n\nDurée totale " + formateDuree(duree);
 				texte += " \n\nDistance parcourue " + Position.formateDistance(Distance);
@@ -312,11 +233,22 @@ public class Itineraire
 
 				texte += "\n\nAltitude min " + altitudeMin + "m";
 				texte += "\nAltitude max " + altitudeMax + "m";
-				texte += "\nDénivelé " + (altitudeMax-altitudeMin) + "m" ;
+				texte += "\nDénivelé " + (altitudeMax - altitudeMin) + "m";
 				texte += "\nCumul dénivellé positif " + denivellePos + "m";
 				texte += "\nCumul dénivellé negatif " + denivelleNeg + "m";
+
+				if (vitMin != null)
+					vitMin.setValeur(vitesseMin);
+				if (vitMax != null)
+					vitMax.setValeur(vitesseMax);
+				if (altMin != null)
+					altMin.setValeur(altitudeMin);
+				if (altMax != null)
+					altMax.setValeur(altitudeMax);
 			}
 		}
+
+
 		return texte;
 	}
 

@@ -1,15 +1,12 @@
 package com.lpi.itineraires;
 
-import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +21,7 @@ import android.widget.ListView;
 import com.lpi.itineraires.database.ItinerairesDatabase;
 import com.lpi.itineraires.itineraire.Itineraire;
 import com.lpi.itineraires.itineraire.ItineraireAdapter;
+import com.lpi.itineraires.permissions.PermissionsActivity;
 import com.lpi.itineraires.report.ReportActivity;
 import com.lpi.itineraires.utils.Report;
 import com.lpi.itineraires.utils.Utils;
@@ -34,6 +32,7 @@ public class MainActivity extends AppCompatActivity
 {
 	public static final String TAG = "SuiviRando";
 	static public final int RESULT_EDIT_RANDO = 0;
+	private static final int RESULT_REQUEST_PERMISSIONS = 10;
 	@Nullable
 	private ItineraireAdapter _adapterRandos;
 	private int _currentItemSelected = 0;
@@ -49,6 +48,7 @@ public class MainActivity extends AppCompatActivity
 		//_applicationActivity = this;
 		Utils.setTheme(this);
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.activity_main);
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -66,14 +66,7 @@ public class MainActivity extends AppCompatActivity
 
 		InitItineraires();
 
-		// Les permissions ont ete verifiee au demarrage de l'application
-		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-				|| ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-				|| ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-		{
-			String[] p = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-			ActivityCompat.requestPermissions(this, p, 0);
-		}
+		PermissionsActivity.checkPermissions(this, R.array.permissions, R.array.description_permissions, RESULT_REQUEST_PERMISSIONS);
 	}
 
 
@@ -208,6 +201,13 @@ public class MainActivity extends AppCompatActivity
 				if (data != null)
 					onEditItineraire(data);
 				break;
+
+			case RESULT_REQUEST_PERMISSIONS:
+				// Retour de demande d'autorisation au systeme, verifier qu'on a bien toutes les permissions requises, reouvrir
+				// l'ecran si besoins
+				PermissionsActivity.checkPermissions(this, R.array.permissions, R.array.description_permissions, RESULT_REQUEST_PERMISSIONS);
+				break;
+
 		}
 	}
 

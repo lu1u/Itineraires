@@ -7,6 +7,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.lpi.itineraires.BuildConfig;
 import com.lpi.itineraires.database.DatabaseHelper;
 import com.lpi.itineraires.report.HistoriqueDatabase;
 import com.lpi.itineraires.report.TracesDatabase;
@@ -21,6 +22,8 @@ import java.util.Locale;
 @SuppressWarnings("nls")
 public class Report
 {
+	private static boolean DEBUG_MODE = BuildConfig.DEBUG;
+
 	// Niveaux de trace
 	public enum NIVEAU
 	{
@@ -33,15 +36,17 @@ public class Report
 	@Nullable
 	private static Report INSTANCE = null;
 
-	final HistoriqueDatabase _historiqueDatabase;
-	final TracesDatabase _tracesDatabase;
+	HistoriqueDatabase _historiqueDatabase;
+	TracesDatabase _tracesDatabase;
 
 
 	private Report(Context context)
 	{
-		_historiqueDatabase = HistoriqueDatabase.getInstance(context);
-		_tracesDatabase = TracesDatabase.getInstance(context);
-
+		if (DEBUG_MODE)
+		{
+			_historiqueDatabase = HistoriqueDatabase.getInstance(context);
+			_tracesDatabase = TracesDatabase.getInstance(context);
+		}
 	}
 
 	/**
@@ -102,27 +107,27 @@ public class Report
 				c.get(Calendar.SECOND)); // + ":" + c.get(Calendar.MILLISECOND) ;
 	}
 
-	/*public static String getLocalizedDate()
-{
-	return getLocalizedDate(System.currentTimeMillis());
-}*/
 
 	public void log(@NonNull NIVEAU niv, @NonNull String message)
 	{
-		_tracesDatabase.Ajoute(DatabaseHelper.CalendarToSQLiteDate(null), toInt(niv), message);
+		if (DEBUG_MODE)
+			_tracesDatabase.Ajoute(DatabaseHelper.CalendarToSQLiteDate(null), toInt(niv), message);
 	}
 
 	public void log(@NonNull NIVEAU niv, @NonNull Exception e)
 	{
-		log(niv, e.getLocalizedMessage());
-		for (int i = 0; i < e.getStackTrace().length && i < MAX_BACKTRACE; i++)
-			log(niv, e.getStackTrace()[i].getClassName() + '/' + e.getStackTrace()[i].getMethodName() + ':' + e.getStackTrace()[i].getLineNumber());
-
+		if (DEBUG_MODE)
+		{
+			log(niv, e.getLocalizedMessage());
+			for (int i = 0; i < e.getStackTrace().length && i < MAX_BACKTRACE; i++)
+				log(niv, e.getStackTrace()[i].getClassName() + '/' + e.getStackTrace()[i].getMethodName() + ':' + e.getStackTrace()[i].getLineNumber());
+		}
 	}
 
 	public void historique(@NonNull String message)
 	{
-		_historiqueDatabase.ajoute(DatabaseHelper.CalendarToSQLiteDate(null), message);
+		if (DEBUG_MODE)
+			_historiqueDatabase.ajoute(DatabaseHelper.CalendarToSQLiteDate(null), message);
 	}
 
 

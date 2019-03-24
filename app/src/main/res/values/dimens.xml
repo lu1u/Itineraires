@@ -17,4 +17,5 @@
     <dimen name="chart_padding">16dp</dimen>
     <dimen name="min_chart_size">100dp</dimen>
     <dimen name="coin_fond_element_liste">3dp</dimen>
+    <dimen name="taille_icone_permission">32dp</dimen>
 </resources>

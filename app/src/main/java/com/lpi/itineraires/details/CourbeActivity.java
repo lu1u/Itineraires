@@ -126,23 +126,23 @@ public class CourbeActivity extends AppCompatActivity
 					cursor.moveToFirst();
 					Position precedente = new Position(cursor);
 					float Distance = 0;
-					float vitesseMin = precedente.Vitesse;
-					float vitesseMax = precedente.Vitesse;
-					long debut = precedente.Temps;
+					float vitesseMin = precedente.getSpeed();
+					float vitesseMax = precedente.getSpeed();
+					long debut = precedente.getTime();
 
 					while (cursor.moveToNext())
 					{
 						Position position = new Position(cursor);
 						Distance += precedente.distanceTo(position);
-						if (position.Vitesse < vitesseMin)
-							vitesseMin = position.Vitesse;
+						if (position.getSpeed() < vitesseMin)
+							vitesseMin = position.getSpeed();
 
-						if (position.Vitesse > vitesseMax)
-							vitesseMax = position.Vitesse;
+						if (position.getSpeed() > vitesseMax)
+							vitesseMax = position.getSpeed();
 
 						precedente = position;
 					}
-					long fin = precedente.Temps; // derniere
+					long fin = precedente.getTime(); // derniere
 					long duree = (fin - debut) / 1000L;
 					texte += "\n\nDurée totale " + formateDuree(duree);
 					texte += " \n\nDistance parcourue " + Position.formateDistance(Distance);

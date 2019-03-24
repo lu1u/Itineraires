@@ -2,11 +2,8 @@ package com.lpi.itineraires.utils;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -129,16 +126,16 @@ public static void setTheme(@NonNull Activity a)
 	}
 }
 
-public static Bitmap getBitmap(Context context, int resId)
-{
-	/*
-}
-	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-		return context.getResources().getDrawable(resId, context.getApplicationContext().getTheme());
-else
-		return context.getResources().getDrawable(resId);      */
-	return BitmapFactory.decodeResource(context.getResources(), resId);
-}
+//public static Bitmap getBitmap(Context context, int resId)
+//{
+//	/*
+//}
+//	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+//		return context.getResources().getDrawable(resId, context.getApplicationContext().getTheme());
+//else
+//		return context.getResources().getDrawable(resId);      */
+//	return BitmapFactory.decodeResource(context.getResources(), resId);
+//}
 
 public static void confirmDialog(@NonNull Activity a, @NonNull String titre, @NonNull String message, final int requestCode, final @NonNull ConfirmListener listener)
 {

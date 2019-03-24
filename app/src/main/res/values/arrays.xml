@@ -64,4 +64,18 @@
         <item>Voiture</item>
         <item>Autre</item>
     </string-array>
+
+    <string-array name="permissions">
+        <item>android.permission.ACCESS_FINE_LOCATION</item>
+        <item>android.permission.ACCESS_COARSE_LOCATION</item>
+        <item>android.permission.WRITE_EXTERNAL_STORAGE</item>
+        <item>android.permission.WAKE_LOCK</item>
+    </string-array>
+
+    <string-array name="description_permissions">
+        <item>Recevoir la localisation fine</item>
+        <item>Recevoir la localisation approximative</item>
+        <item>Ecrire sur la carte SD pour exporter les itinéraires</item>
+        <item>Empêcher l\'appareil de passer en mode veille pour continuer à enregistrer l\'itinéraire</item>
+    </string-array>
 </resources>

@@ -57,7 +57,7 @@ public class DetailsItinerairesActivity extends AppCompatActivity
 				"Distance/Temps",
 				"Altitude/Temps",
 		};
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,pages );
+		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, pages);
 		spinner.setAdapter(adapter);
 		/*spinner.setAdapter(new MyAdapter(
 				toolbar.getContext(),
@@ -130,13 +130,13 @@ public class DetailsItinerairesActivity extends AppCompatActivity
 			while (cursor.moveToNext())
 			{
 				Position position = new Position(cursor);
-				_longitudes[i] = (float) position.Longitude;
-				_latitudes[i] = (float) position.Latitude;
-				_altitudes[i] = (float) position.Altitude;
-				_bearings[i] = position.Bearing;
-				//_temps[i] = (float) position.Temps;
+				_longitudes[i] = (float) position.getLongitude();
+				_latitudes[i] = (float) position.getLatitude();
+				_altitudes[i] = (float) position.getAltitude();
+				_bearings[i] = position.getBearing();
+				//_temps[i] = (float) position.getTime();
 				_temps[i] = i;
-				_vitesse[i] = position.Vitesse;
+				_vitesse[i] = position.getSpeed();
 				_distances[i] = distance;
 
 				if (precedente != null)

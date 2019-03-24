@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,49 +21,29 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.lpi.itineraires.database.ItinerairesDatabase;
+import com.lpi.itineraires.details.ClickPositionHandler;
 import com.lpi.itineraires.itineraire.Itineraire;
 import com.lpi.itineraires.itineraire.Position;
 import com.lpi.itineraires.linegraphview.ZoomableLinegraphView;
+import com.lpi.itineraires.utils.DoubleHolder;
+import com.lpi.itineraires.utils.FloatHolder;
 import com.lpi.itineraires.utils.Preferences;
 import com.lpi.itineraires.utils.Utils;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, ClickPositionHandler.positionRefreshListener
 {
 	public static final String EXTRA_RANDO_ID = MapsActivity.class.getCanonicalName() + ".randoId";
 
-	enum TYPE_AFFICHAGE
-	{
-		CARTE(0), DETAILS(1), VITESSE_TEMPS(2), DISTANCE_TEMPS(3), ALTITUDE_TEMPS(4), VITESSE_V_TEMPS(5);
-		private int _value;
 
-		TYPE_AFFICHAGE(final int i)
-		{
-			_value = i;
-		}
-
-		public int getValue()
-		{
-			return _value;
-		}
-
-		public static TYPE_AFFICHAGE fromInt(int i)
-		{
-			for (TYPE_AFFICHAGE b : TYPE_AFFICHAGE.values())
-			{
-				if (b.getValue() == i)
-				{
-					return b;
-				}
-			}
-			return CARTE;
-		}
-	}	;
-
-	private TYPE_AFFICHAGE _typeAffichage ;
+	private TYPE_AFFICHAGE _typeAffichage;
+	private Polyline _mapPolyline;
 	final double GLOBE_WIDTH = 256; // a constant in Google's map projection
 	final double LN2 = 0.6931471805599453;
 	private static final long MINUTE = 60;
@@ -74,20 +55,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	SupportMapFragment mapFragment;
 	private TextView _textDetails;
 	private ZoomableLinegraphView _vitesseTemps, _altitudeTemps, _distanceTemps, _vitesseVertTemps;
-
-	/***
-	 * Demarre l'activity avec les parametres necessaires
-	 * @param context
-	 * @param id
-	 */
-	public static void start(final Context context, final int id)
-	{
-		Intent intent = new Intent(context, MapsActivity.class);
-		Bundle b = new Bundle();
-		b.putInt(EXTRA_RANDO_ID, id);
-		intent.putExtras(b);
-		context.startActivity(intent);
-	}
+	private FloatHolder _vitesseMin = new FloatHolder();
+	private FloatHolder _vitesseMax = new FloatHolder();
+	private DoubleHolder _altitudeMin = new DoubleHolder();
+	private DoubleHolder _altitudeMax = new DoubleHolder();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -116,7 +87,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 		mapFragment.getMapAsync(this);
 		_textDetails = findViewById(R.id.textViewDescription);
-		_textDetails.setText(_itineraire.getDetails(this));
+		_textDetails.setText(_itineraire.getDetails(this, _vitesseMin, _vitesseMax, _altitudeMin, _altitudeMax));
 		_vitesseTemps = findViewById(R.id.ilgvVitesseTemps);
 		_vitesseVertTemps = findViewById(R.id.ilgvVitesseVTemps);
 		_altitudeTemps = findViewById(R.id.ilgvAltitudeTemps);
@@ -127,6 +98,104 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 		Snackbar.make(mapFragment.getView(), R.string.map_activity_advice
 				, Snackbar.LENGTH_LONG).show();
+	}
+
+	/***
+	 * Demarre l'activity avec les parametres necessaires
+	 * @param context
+	 * @param id
+	 */
+	public static void start(final Context context, final int id)
+	{
+		Intent intent = new Intent(context, MapsActivity.class);
+		Bundle b = new Bundle();
+		b.putInt(EXTRA_RANDO_ID, id);
+		intent.putExtras(b);
+		context.startActivity(intent);
+	}
+
+	/**
+	 * Manipulates the map once available.
+	 * This callback is triggered when the map is ready to be used.
+	 * This is where we can add markers or lines, add listeners or move the camera. In this case,
+	 * we just add a marker near Sydney, Australia.
+	 * If Google Play services is not installed on the device, the user will be prompted to install
+	 * it inside the SupportMapFragment. This method will only be triggered once the user has
+	 * installed Google Play services and returned to the app.
+	 */
+	@Override
+	public void onMapReady(GoogleMap googleMap)
+	{
+		mMap = googleMap;
+
+		if (_itineraire != null)
+		{
+			Cursor cursor = ItinerairesDatabase.getInstance(this).getPositions(_itineraire.Id);
+			if (null != cursor)
+				if (cursor.getCount() > 0)
+				{
+					//PolylineOptions polyline = new PolylineOptions();
+					double latMin = Double.MAX_VALUE;
+					double latMax = Double.MIN_VALUE;
+					double longMin = Double.MAX_VALUE;
+					double longMax = Double.MIN_VALUE;
+					Position precedente = null;
+
+					while (cursor.moveToNext())
+					{
+						Position position = new Position(cursor);
+
+						//polyline.add(position.toLatLng());
+
+						if (position.getLatitude() < latMin) latMin = position.getLatitude();
+						if (position.getLatitude() > latMax) latMax = position.getLatitude();
+						if (position.getLongitude() < longMin)
+							longMin = position.getLongitude();
+						if (position.getLongitude() > longMax)
+							longMax = position.getLongitude();
+
+						Log.d("PROVIDER", position.getProvider());
+						Marker m = googleMap.addMarker(new MarkerOptions()
+
+								.position(position.toLatLng())
+								.title(position.getAltitude() + "m")
+								.icon(BitmapDescriptorFactory.defaultMarker(position.getProvider().equals("gps") ? BitmapDescriptorFactory.HUE_AZURE : BitmapDescriptorFactory.HUE_ROSE)));
+						m.setTag(position);
+						mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+						{
+							@Override
+							public boolean onMarkerClick(final Marker marker)
+							{
+								Object o = marker.getTag();
+								if (o instanceof Position)
+								{
+									ClickPositionHandler.handleClickPosition(marker, (Position) o, MapsActivity.this, MapsActivity.this);
+									return true;
+								}
+
+								return false;
+							}
+						});
+						if (precedente != null)
+						{
+							PolylineOptions po = new PolylineOptions();
+							po.add(precedente.toLatLng());
+							po.add(position.toLatLng());
+							po.color(getColor(position.getSpeed(), _vitesseMin.getValeur(), _vitesseMax.getValeur(), Color.RED, Color.GREEN));
+							googleMap.addPolyline(po);
+						}
+						precedente = position;
+					}
+					//polyline.color(Color.BLUE);
+					//polyline.width(7.5f);
+
+					//_mapPolyline = googleMap.addPolyline(polyline);
+
+					final LatLng centre = new LatLng((latMin + latMax) / 2.0, (longMin + longMax) / 2.0);
+					float zoom = getNiveauZoom(latMin, longMin, latMax, longMax);//Preferences.getInstance(this).getNiveauZoom();
+					mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(centre, zoom));
+				}
+		}
 	}
 
 	@Override
@@ -197,54 +266,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 		}
 	}
 
-
-	/**
-	 * Manipulates the map once available.
-	 * This callback is triggered when the map is ready to be used.
-	 * This is where we can add markers or lines, add listeners or move the camera. In this case,
-	 * we just add a marker near Sydney, Australia.
-	 * If Google Play services is not installed on the device, the user will be prompted to install
-	 * it inside the SupportMapFragment. This method will only be triggered once the user has
-	 * installed Google Play services and returned to the app.
-	 */
-	@Override
-	public void onMapReady(GoogleMap googleMap)
+	private int getColor(final float speed, final float vitesseMin, final float vitesseMax, final int colorMin, final int colorMax)
 	{
-		mMap = googleMap;
+		int r = composante(speed, vitesseMin, vitesseMax, Color.red(colorMin), Color.red(colorMax));
+		int g = composante(speed, vitesseMin, vitesseMax, Color.green(colorMin), Color.green(colorMax));
+		int b = composante(speed, vitesseMin, vitesseMax, Color.blue(colorMin), Color.blue(colorMax));
 
-		if (_itineraire != null)
-		{
-			Cursor cursor = ItinerairesDatabase.getInstance(this).getPositions(_itineraire.Id);
-			if (null != cursor)
-				if (cursor.getCount() > 0)
-				{
-					PolylineOptions polyline = new PolylineOptions();
-					double latMin = Double.MAX_VALUE;
-					double latMax = Double.MIN_VALUE;
-					double longMin = Double.MAX_VALUE;
-					double longMax = Double.MIN_VALUE;
+		return Color.rgb(r, g, b);
+	}
 
-					while (cursor.moveToNext())
-					{
-						Position position = new Position(cursor);
-						polyline.add(position.toLatLng());
-
-						if (position.Latitude < latMin) latMin = position.Latitude;
-						if (position.Latitude > latMax) latMax = position.Latitude;
-						if (position.Longitude < longMin) longMin = position.Longitude;
-						if (position.Longitude > longMax) longMax = position.Longitude;
-					}
-					polyline.color(Color.BLUE);
-					polyline.width(7.5f);
-
-					Polyline line = googleMap.addPolyline(polyline);
-
-
-					final LatLng centre = new LatLng((latMin + latMax) / 2.0, (longMin + longMax) / 2.0);
-					float zoom = getNiveauZoom(latMin, longMin, latMax, longMax);//Preferences.getInstance(this).getNiveauZoom();
-					mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(centre, zoom));
-				}
-		}
+	private int composante(final float speed, final float vitesseMin, final float vitesseMax, final int min, final int max)
+	{
+		int res = (int) (min + (speed - vitesseMin) / (vitesseMax - vitesseMin) * (max - min));
+		if (res < 0)
+			res = 0;
+		if (res > 255)
+			res = 255;
+		return res;
 	}
 
 	/***
@@ -258,7 +296,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 	 */
 	private float getNiveauZoom(final double south, final double west, final double north, final double east)
 	{
-		double zoom = 1;
+		double zoom;
 
 		double angle = east - west;
 		double angle2 = north - south;
@@ -281,26 +319,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 		return (float) zoom;
 	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creation du menu de l'activity
-	 *
-	 * @param menu
-	 * @return
-	 */
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.menu_map, menu);
-
-		return true;
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Selection dans le menu de l'activity
@@ -355,7 +373,63 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 					return super.onOptionsItemSelected(item);
 			}
 		majUI();
-		Preferences.getInstance(this).setAffichageDetails( _typeAffichage.getValue());
+		Preferences.getInstance(this).setAffichageDetails(_typeAffichage.getValue());
 		return true;
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Creation du menu de l'activity
+	 *
+	 * @param menu
+	 * @return
+	 */
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_map, menu);
+
+		return true;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override
+	public void onClickPositionHandlerPositionSupprimee(Marker marker, Position posSupprimee)
+	{
+		marker.remove();
+		//_mapPolyline.
+	}
+
+	enum TYPE_AFFICHAGE
+	{
+		CARTE(0), DETAILS(1), VITESSE_TEMPS(2), DISTANCE_TEMPS(3), ALTITUDE_TEMPS(4), VITESSE_V_TEMPS(5);
+		private int _value;
+
+		TYPE_AFFICHAGE(final int i)
+		{
+			_value = i;
+		}
+
+		public int getValue()
+		{
+			return _value;
+		}
+
+		public static TYPE_AFFICHAGE fromInt(int i)
+		{
+			for (TYPE_AFFICHAGE b : TYPE_AFFICHAGE.values())
+			{
+				if (b.getValue() == i)
+				{
+					return b;
+				}
+			}
+			return CARTE;
+		}
+	}
+
 }

@@ -14,6 +14,7 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.lpi.itineraires.GPS.GPSService;
+import com.lpi.itineraires.GPSTrackingNotification;
 import com.lpi.itineraires.MainActivity;
 import com.lpi.itineraires.R;
 import com.lpi.itineraires.database.DatabaseHelper;
@@ -49,10 +50,13 @@ public class ItineraireAdapter extends CursorAdapter
 	@Override
 	public void bindView(@NonNull final View view, final Context context, Cursor cursor)
 	{
+
 		// Find fields to populate in inflated template
 		final Itineraire itineraire = new Itineraire(cursor);
+
+		view.findViewById(R.id.layoutFond).setBackgroundColor(TypeItineraire.couleur(context, itineraire.Type));
 		((TextView) view.findViewById(R.id.textViewNom)).setText(itineraire.Nom);
-		((TextView) view.findViewById(R.id.textViewType)).setText(Itineraire.getTexteType(itineraire.Type));
+		((TextView) view.findViewById(R.id.textViewType)).setText(TypeItineraire.getTexteType(itineraire.Type));
 		((TextView) view.findViewById(R.id.textViewDescription)).setText(itineraire.getDescription(_context, false));
 
 		final View btnRecord = view.findViewById(R.id.imageViewRecord);
@@ -91,13 +95,14 @@ public class ItineraireAdapter extends CursorAdapter
 		// Relire la rando
 		final Itineraire rnd = database.getItineraire(id);
 
-		if ( rnd !=null)
+		if (rnd != null)
 		{
 			if (database.getNbPositions(id) == 0)
 			{
 				// Pas besoin de confirmation
 				demarreEnregistrement(view, rnd);
-			} else
+			}
+			else
 			{
 				// La randonnee a deja des positions, confirmer le redemarrage
 				AlertDialog dialog = new AlertDialog.Builder(_context).create();
@@ -138,6 +143,7 @@ public class ItineraireAdapter extends CursorAdapter
 		ItinerairesDatabase.getInstance(_context).modifie(itineraire);
 		GPSService.update(view.getContext());
 
+		GPSTrackingNotification.notify(_context, "Enregistrement en cours", 1);
 		// Maj de l'interface utilisateur
 		((TextView) view.findViewById(R.id.textViewDescription)).setText(itineraire.getDescription(_context, false));
 		final View btnRecord = view.findViewById(R.id.imageViewRecord);
@@ -155,9 +161,9 @@ public class ItineraireAdapter extends CursorAdapter
 		ItinerairesDatabase database = ItinerairesDatabase.getInstance(_context);
 		// Relire la rando
 		Itineraire rnd = database.getItineraire(id);
-		if ( rnd !=null)
+		if (rnd != null)
 		{
-			MainActivity.MessageNotification(view, _context.getString(R.string.arret_enregistrement,rnd.Nom));
+			MainActivity.MessageNotification(view, _context.getString(R.string.arret_enregistrement, rnd.Nom));
 			Report.getInstance(_context).historique("Fin enregistrement " + rnd.Nom);
 
 			// Stoppe l'enregistrement
@@ -165,6 +171,9 @@ public class ItineraireAdapter extends CursorAdapter
 			rnd.Enregistre = false;
 			database.modifie(rnd); // Supprimer l'etat AVANT de stopper le service, sinon il va tenter de se relancer
 			GPSService.update(_context);
+			if (database.getNbItinerairesEnregistrant() == 0)
+				GPSTrackingNotification.cancel(_context);
+
 
 			// Maj de l'interface utilisateur
 			((TextView) view.findViewById(R.id.textViewDescription)).setText(rnd.getDescription(_context, false));
@@ -186,10 +195,9 @@ public class ItineraireAdapter extends CursorAdapter
 
 			if (cursor.moveToPosition(position))
 				return new Itineraire(cursor);
-		}
-		catch(Exception e)
+		} catch (Exception e)
 		{
-
+			Report.getInstance(_context).log(Report.NIVEAU.ERROR, e);
 		}
 		return null;
 	}
@@ -203,6 +211,6 @@ public class ItineraireAdapter extends CursorAdapter
 		{
 			return cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLONNE_ITI_ID));
 		}
-		return ItinerairesDatabase.INVALID_ID ;
+		return ItinerairesDatabase.INVALID_ID;
 	}
 }

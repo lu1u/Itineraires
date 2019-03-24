@@ -30,8 +30,7 @@ public class ItinerairesDatabase extends GenericDatabase
 			_report.log(Report.NIVEAU.DEBUG, "Creation ItinerairesDatabase");
 			_dbHelper = new DatabaseHelper(context);
 			_database = _dbHelper.getWritableDatabase();
-		}
-		catch (Exception e)
+		} catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -232,12 +231,17 @@ public class ItinerairesDatabase extends GenericDatabase
 		{
 			ContentValues valeurs = new ContentValues();
 			itineraire.toContentValues(valeurs, true);
+			//_database.beginTransactionNonExclusive();
 			_database.update(DatabaseHelper.TABLE_ITINERAIRE, valeurs, DatabaseHelper.COLONNE_ITI_ID + " = " + itineraire.Id, null);
+			// _database.setTransactionSuccessful();
 		} catch (Exception e)
 		{
 			_report.log(Report.NIVEAU.ERROR, "Erreur modification itineraire, id=" + itineraire.Id);
 			_report.log(Report.NIVEAU.ERROR, e);
 			MainActivity.SignaleErreur("modification du profil", e);
+		} finally
+		{
+			//_database.endTransaction();
 		}
 	}
 
@@ -269,6 +273,34 @@ public class ItinerairesDatabase extends GenericDatabase
 		return true;
 	}
 
+	/***
+	 * Supprime une position
+	 * @param position a supprimer
+	 * @return true si operation ok, false si erreur
+	 */
+	public boolean supprime(Position position)
+	{
+		try
+		{
+			// Operation effectuee dans une transaction sqlite pour garantir la coherence de la base
+			_database.beginTransaction();
+			// supprimer les positions associees a cette rando
+			_database.delete(DatabaseHelper.TABLE_POSITIONS,
+					DatabaseHelper.COLONNE_POS_IDRANDO + " = " + position.IdRandonnee +
+							" AND " + DatabaseHelper.COLONNE_POS_TEMPS + " = " + position.getTime() +
+							" AND " + DatabaseHelper.COLONNE_POS_PROVIDER + " = \"" + position.getProvider() + "\"", null);
+
+			_database.setTransactionSuccessful();
+		} catch (Exception e)
+		{
+			_report.log(Report.NIVEAU.ERROR, e);
+			_database.endTransaction();
+			return false;
+		}
+
+		_database.endTransaction();
+		return true;
+	}
 
 	public @Nullable
 	Cursor getCursor()
@@ -308,7 +340,7 @@ public class ItinerairesDatabase extends GenericDatabase
 	 * Retourne le nombre de randonnees en cours d'enregistrement
 	 * @return
 	 */
-	public int getItinerairesEnregistrant()
+	public int getNbItinerairesEnregistrant()
 	{
 		Cursor cursor = _database.rawQuery("SELECT COUNT (*) FROM " + DatabaseHelper.TABLE_ITINERAIRE + " WHERE " + DatabaseHelper.COLONNE_ITI_ENREGISTRE + " <> 0", null);
 		int count = 0;
@@ -358,7 +390,7 @@ public class ItinerairesDatabase extends GenericDatabase
 	public @Nullable
 	Cursor getPositions(int randoId)
 	{
-		return _database.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_POSITIONS + " WHERE " + DatabaseHelper.COLONNE_POS_IDRANDO + " == " + randoId, null);
+		return _database.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_POSITIONS + " WHERE " + DatabaseHelper.COLONNE_POS_IDRANDO + " == " + randoId + " ORDER BY " + DatabaseHelper.COLONNE_POS_TEMPS, null);
 	}
 
 

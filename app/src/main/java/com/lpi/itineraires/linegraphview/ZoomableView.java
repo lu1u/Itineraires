@@ -170,7 +170,6 @@ public class ZoomableView extends View
 		} finally
 		{
 			a.recycle();
-			;
 		}
 
 		initPaints();

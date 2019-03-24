@@ -330,7 +330,7 @@ public class ZoomableLinegraphView extends ZoomableView
 			canvas.drawText(
 					mLabelBuffer, labelOffset, labelLength,
 					mContentRect.left - mLabelSeparation,
-					mAxisYPositionsBuffer[i] + mLabelHeight / 2,
+					mAxisYPositionsBuffer[i] + mLabelHeight / 2.0f,
 					mLabelTextPaint);
 		}
 	}

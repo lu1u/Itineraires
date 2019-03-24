@@ -66,7 +66,7 @@
     <color name="primary4">#795548</color>
     <color name="primary_dark4">#5D4037</color>
     <color name="primary_light4">#D7CCC8</color>
-    <color name="accent4">#9e9e9e</color>
+    <color name="accent4">#FF5722</color>
     <color name="primary_text4">#212121</color>
     <color name="secondary_text4">#727272</color>
     <color name="icons4">#FFFFFF</color>
@@ -93,4 +93,15 @@
     <color name="icons6">#212121</color>
     <color name="divider6">#b6b6b6</color>
     <color name="couleurHint6">@color/primary_light6</color>
+
+    <color name="type_apied">#CFD8DC</color>
+    <color name="type_vtt">#F5F5F5</color>
+    <color name="type_velo">#D7CCC8</color>
+    <color name="type_skipiste">#FFCCBC</color>
+    <color name="type_skifond">#FFE0B2</color>
+    <color name="type_skirando">#FFECB3</color>
+    <color name="type_moto">#FFF9C4</color>
+    <color name="type_voiture">#F0F4C3</color>
+    <color name="type_autre">#DCEDC8</color>
+
 </resources>

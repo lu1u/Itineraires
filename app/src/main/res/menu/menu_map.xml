@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/action_affiche_carte"
@@ -34,5 +33,5 @@
         android:title="Altitude/Temps" />
     <item
         android:id="@+id/action_affiche_vitessevert_temps"
-        android:title="Vitesse vert/Temps" ></item>
+        android:title="Vitesse vert/Temps" />
 </menu>

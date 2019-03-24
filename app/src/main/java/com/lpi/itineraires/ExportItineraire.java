@@ -17,6 +17,7 @@ import android.widget.RadioGroup;
 import com.lpi.itineraires.database.ItinerairesDatabase;
 import com.lpi.itineraires.itineraire.Itineraire;
 import com.lpi.itineraires.itineraire.Position;
+import com.lpi.itineraires.utils.Report;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -132,16 +133,16 @@ class ExportItineraire
 					Position position = new Position(c);
 					bw.write( "" +
 							position.IdRandonnee
-							+ ","  + position.Latitude
-							+ ", " + position.Longitude
-							+ ", " + position.Altitude
-							+ ", " + position.Temps
-							+ ", " + formateDate(position.Temps)
-							+ ", " + formateHeure(position.Temps)
-							+ ", " + position.Vitesse
-							+ ", " + position.Provider
-							+ ", " + position.Accurary
-							+ ", " + position.Bearing
+							+ "," + position.getLatitude()
+							+ ", " + position.getLongitude()
+							+ ", " + position.getAltitude()
+							+ ", " + position.getTime()
+							+ ", " + formateDate(position.getTime())
+							+ ", " + formateHeure(position.getTime())
+							+ ", " + position.getSpeed()
+							+ ", " + position.getProvider()
+							+ ", " + position.getAccuracy()
+							+ ", " + position.getBearing()
 							+"\n");
 
 				}
@@ -149,6 +150,7 @@ class ExportItineraire
 			stream.close();
 		} catch (Exception e)
 		{
+			Report.getInstance(context).log(Report.NIVEAU.ERROR, e);
 		}
 
 	}
